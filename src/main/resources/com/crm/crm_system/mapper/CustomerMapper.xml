@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.crm.crm_system.mapper.CustomerMapper">
+
+    <resultMap id="BaseResultMap" type="com.crm.crm_system.entity.Customer">
+        <id property="customerId" column="customer_id" />
+        <result property="customerName" column="customer_name" />
+        <result property="telNo" column="tel_no" />
+        <result property="rankCode" column="rank_code" />
+        <result property="isDeleted" column="is_deleted" />
+        <result property="version" column="version" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+            customer_id,
+            customer_name,
+            tel_no,
+            rank_code,
+            is_deleted,
+            version,
+            created_at,
+            updated_at
+        FROM
+            m_customer
+        WHERE
+            is_deleted = 0
+        ORDER BY
+            customer_id ASC
+    </select>
+
+</mapper>

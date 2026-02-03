@@ -1,0 +1,21 @@
+# ビルド成果物（絶対にコミットしない）
+/target/
+*.class
+*.jar
+*.war
+
+# ログファイル
+*.log
+
+# VS Code / Cursor の設定フォルダ（チームで共有しない設定も含むため除外推奨）
+.vscode/
+.settings/
+.classpath
+.project
+bin/
+
+# Macの不要ファイル
+.DS_Store
+
+# 環境変数や秘密情報（本当は application.properties もここに入れるべきだが、研修なので一旦除外しない）
+# application.properties

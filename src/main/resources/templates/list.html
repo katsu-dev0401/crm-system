@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>顧客一覧</title>
+</head>
+<body>
+    <h1>顧客管理システム</h1>
+    
+    <table border="1">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>顧客名</th>
+                <th>電話番号</th>
+                <th>ランク</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="customer : ${customers}">
+                <td th:text="${customer.customerId}"></td>
+                <td th:text="${customer.customerName}"></td>
+                <td th:text="${customer.telNo}"></td>
+                <td th:text="${customer.rankCode}"></td>
+            </tr>
+        </tbody>
+    </table>
+</body>
+</html>
