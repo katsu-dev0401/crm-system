@@ -32,4 +32,29 @@
             customer_id ASC
     </select>
 
+    <select id="search" resultMap="BaseResultMap">
+        SELECT
+            customer_id,
+            customer_name,
+            tel_no,
+            rank_code,
+            is_deleted,
+            version,
+            created_at,
+            updated_at
+        FROM
+            m_customer
+        <where>
+            is_deleted = 0
+            <if test="name != null and name != ''">
+                AND customer_name LIKE CONCAT('%', #{name}, '%')
+            </if>
+            <if test="rank != null and rank != ''">
+                AND rank_code = #{rank}
+            </if>
+        </where>
+        ORDER BY
+            customer_id ASC
+    </select>
+
 </mapper>

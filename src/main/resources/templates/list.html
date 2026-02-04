@@ -6,7 +6,23 @@
 </head>
 <body>
     <h1>顧客管理システム</h1>
-    
+    <div style="margin-bottom: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 5px;">
+        <form method="get" action="/">
+            <label>顧客名：</label>
+            <input type="text" name="name" th:value="${searchName}" placeholder="部分一致">
+            
+            <label style="margin-left: 10px;">ランク：</label>
+            <select name="rank">
+                <option value="">(全件)</option>
+                <option value="A" th:selected="${searchRank == 'A'}">A:優良</option>
+                <option value="B" th:selected="${searchRank == 'B'}">B:普通</option>
+                <option value="C" th:selected="${searchRank == 'C'}">C:見込</option>
+            </select>
+            
+            <button type="submit" style="margin-left: 10px;">検索</button>
+            <a href="/" style="margin-left: 5px;">クリア</a>
+        </form>
+    </div>
     <table border="1">
         <thead>
             <tr>
