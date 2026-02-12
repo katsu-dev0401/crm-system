@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>顧客詳細</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <style>
+        body { 
+            background-color: #f8f9fa; 
+            font-family: "Meiryo", sans-serif; 
+            font-size: 0.85rem; /* 全体を小さく */
+        }
+        .page-container { 
+            margin: 20px auto; 
+            max-width: 1000px; 
+            background: #fff; 
+            padding: 15px; 
+            border: 1px solid #ccc; 
+        }
+        
+        /* 帳票テーブル */
+        .form-table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 15px; 
+            table-layout: fixed; 
+        }
+        
+        /* 列幅定義: ラベル幅を固定、入力幅は可変 */
+        col.label-col { width: 110px; }
+        col.value-col { width: auto; }
+        
+        .form-table th, .form-table td { 
+            border: 1px solid #dee2e6; 
+            padding: 4px 8px; 
+            vertical-align: middle; 
+        }
+        .form-table th { 
+            background-color: #f8f9fa; 
+            font-weight: bold; 
+            text-align: left; 
+            color: #333; 
+        }
+        
+        /* セクションヘッダー（モノトーン・シンプル） */
+        .section-header th {
+            background-color: #eee !important;
+            color: #000;
+            border-top: 2px solid #ccc !important;
+            border-bottom: 1px solid #ccc !important;
+            font-size: 0.9rem;
+            padding: 6px 10px;
+        }
+
+        /* 入力欄のカスタマイズ（極小） */
+        .form-control-xs {
+            padding: 2px 5px;
+            font-size: 0.8rem;
+            border-radius: 0;
+            border: 1px solid #ced4da;
+        }
+        .form-control-xs:focus { 
+            border-color: #86b7fe; 
+            box-shadow: none; 
+        }
+        .form-select-xs {
+            padding: 2px 5px;
+            font-size: 0.8rem;
+            border-radius: 0;
+            border: 1px solid #ced4da;
+        }
+        .form-select-xs:focus { 
+            border-color: #86b7fe; 
+            box-shadow: none; 
+        }
+        
+        /* ボタンスタイル */
+        .btn-xs { 
+            padding: 2px 8px; 
+            font-size: 0.75rem; 
+            border-radius: 0; 
+        }
+        
+        /* 必須マーク */
+        .required::after { 
+            content: "*"; 
+            color: red; 
+            margin-left: 3px; 
+        }
+    </style>
+</head>
+<body>
+    <div class="page-container">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <h5 class="mb-0 fw-bold">顧客詳細</h5>
+            <div class="text-end text-muted small">
+                登録: <span th:text="${customer.createdAt != null ? #temporals.format(customer.createdAt, 'yyyy-MM-dd') : ''}"></span> / 
+                更新: <span th:text="${customer.updatedAt != null ? #temporals.format(customer.updatedAt, 'yyyy-MM-dd') : ''}"></span>
+            </div>
+        </div>
+        
+        <div th:if="${message}" class="alert alert-success alert-dismissible fade show my-3" role="alert">
+            <span th:text="${message}"></span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+
+        <form th:action="@{/customers/save}" th:object="${customer}" method="post">
+            <input type="hidden" th:field="*{customerId}">
+            
+            <table class="form-table">
+                <colgroup>
+                    <col class="label-col">
+                    <col class="value-col">
+                    <col class="label-col">
+                    <col class="value-col">
+                </colgroup>
+                
+                <tr class="section-header"><th colspan="4">基本情報</th></tr>
+                <tr>
+                    <th>ID</th>
+                    <td th:text="${customer.customerId == null ? '(新規)' : customer.customerId}"></td>
+                    <th class="required">業種</th>
+                    <td>
+                        <select class="form-select form-control-xs" th:field="*{industryCode}" style="max-width: 200px;" th:errorclass="is-invalid">
+                            <option value="">選択</option>
+                            <option th:each="entry : ${industryMap}"
+                                    th:value="${entry.key}"
+                                    th:text="${entry.value}">
+                            </option>
+                        </select>
+                        <div class="invalid-feedback" th:errors="*{industryCode}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th class="required">会社名</th>
+                    <td>
+                        <input type="text" class="form-control form-control-xs" th:field="*{companyName}" maxlength="100" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{companyName}"></div>
+                    </td>
+                    <th>カナ</th>
+                    <td>
+                        <input type="text" class="form-control form-control-xs" th:field="*{companyNameKana}" maxlength="100" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{companyNameKana}"></div>
+                    </td>
+                </tr>
+
+                <tr class="section-header"><th colspan="4">住所情報</th></tr>
+                <tr>
+                    <th>郵便番号</th>
+                    <td colspan="3">
+                        <div class="d-flex align-items-center gap-2">
+                            <input type="text" class="form-control form-control-xs" th:field="*{postalCode}" id="zipcode" style="width: 80px;" maxlength="8" th:errorclass="is-invalid">
+                            <button type="button" class="btn btn-secondary btn-xs" id="btn-address-search">住所検索</button>
+                        </div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('postalCode')}" th:errors="*{postalCode}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>住所</th>
+                    <td colspan="3">
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-xs" th:field="*{prefecture}" id="prefecture" placeholder="都道府県" style="width: 100px;" maxlength="10" th:errorclass="is-invalid">
+                            <input type="text" class="form-control form-control-xs" th:field="*{city}" id="city" placeholder="市区町村" style="width: 150px;" maxlength="100" th:errorclass="is-invalid">
+                            <input type="text" class="form-control form-control-xs flex-grow-1" th:field="*{address1}" id="address1" placeholder="番地" maxlength="100" th:errorclass="is-invalid">
+                        </div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('prefecture')}" th:errors="*{prefecture}"></div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('city')}" th:errors="*{city}"></div>
+                        <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('address1')}" th:errors="*{address1}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>建物名</th>
+                    <td colspan="3">
+                        <input type="text" class="form-control form-control-xs" th:field="*{address2}" maxlength="100" th:errorclass="is-invalid">
+                        <div class="invalid-feedback" th:errors="*{address2}"></div>
+                    </td>
+                </tr>
+
+                <tbody class="section-header">
+                    <tr>
+                        <th colspan="4" style="border-bottom: none;">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>担当者・連絡先</span>
+                                <button type="button" class="btn btn-primary btn-xs" id="add-contact-btn">＋ 担当者追加</button>
+                            </div>
+                        </th>
+                    </tr>
+                </tbody>
+
+                <tbody id="contact-area">
+                    <th:block th:each="contact, stat : *{contacts}">
+                        <tr class="contact-block">
+                            <th>自社担当</th>
+                            <td>
+                                <input type="hidden" th:field="*{contacts[__${stat.index}__].contactId}">
+                                <select class="form-select form-select-xs" 
+                                        th:field="*{contacts[__${stat.index}__].internalRep}" style="width: 150px;" th:errorclass="is-invalid">
+                                    <option value="">選択してください</option>
+                                    <option th:each="user : ${users}" 
+                                            th:value="${user.userName}" 
+                                            th:text="${user.userName}"></option>
+                                </select>
+                                <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].internalRep}"></div>
+                            </td>
+                            <td colspan="2" class="text-end">
+                                <button type="button" class="btn btn-danger btn-xs" onclick="removeContactRow(this)">削除</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>担当者名</th>
+                            <td>
+                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].contactName}" maxlength="60" th:errorclass="is-invalid">
+                                <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].contactName}"></div>
+                            </td>
+                            <th>部署・役職</th>
+                            <td>
+                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].department}" maxlength="100" th:errorclass="is-invalid">
+                                <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].department}"></div>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>TEL</th>
+                            <td>
+                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].telNo}" maxlength="30" th:errorclass="is-invalid">
+                                <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].telNo}"></div>
+                            </td>
+                            <th>Email</th>
+                            <td>
+                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].email}" maxlength="255" th:errorclass="is-invalid">
+                                <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].email}"></div>
+                            </td>
+                        </tr>
+                        <tr class="divider-row"><td colspan="4" style="background-color: #e9ecef; height: 10px; border: none;"></td></tr>
+                    </th:block>
+                </tbody>
+
+                <tr class="section-header"><th colspan="4">その他</th></tr>
+                <tr>
+                    <th>備考</th>
+                    <td colspan="3">
+                        <textarea class="form-control form-control-xs" rows="2" th:field="*{remarks}" maxlength="1000" th:errorclass="is-invalid"></textarea>
+                        <div class="invalid-feedback" th:errors="*{remarks}"></div>
+                    </td>
+                </tr>
+                <tr>
+                    <th>配信設定</th>
+                    <td colspan="3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emailAllow" th:field="*{isEmailAllowed}">
+                            <label class="form-check-label small" for="emailAllow">メール配信を許可する</label>
+                        </div>
+                    </td>
+                </tr>
+            </table>
+
+            <div class="d-flex justify-content-center gap-2 mt-3">
+                <a href="/" class="btn btn-secondary btn-sm rounded-0 px-4">戻る</a>
+                <button type="button" class="btn btn-danger btn-sm rounded-0 px-4"
+                        th:if="${customer.customerId != null}"
+                        data-bs-toggle="modal" data-bs-target="#deleteModal">
+                    削除
+                </button>
+                <a th:href="@{/customers/edit/{id}(id=${customer.customerId})}"
+                   th:if="${customer.customerId != null}"
+                   class="btn btn-outline-secondary btn-sm rounded-0 px-4">取消</a>
+                <button type="submit" class="btn btn-primary btn-sm rounded-0 px-4">保存</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- 削除確認モーダル -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title fs-6" id="deleteModalLabel">削除確認</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    本当に削除しますか？<br>
+                    <span class="text-muted small">この操作は取り消せません。</span>
+                </div>
+                <div class="modal-footer justify-content-center">
+                    <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">キャンセル</button>
+                    <form th:action="@{/customers/delete/{id}(id=${customer.customerId})}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-danger btn-sm">実行</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // 住所検索
+        document.getElementById('btn-address-search').addEventListener('click', function() {
+            const zipcode = document.getElementById('zipcode').value;
+            fetch('/api/address?zipcode=' + zipcode)
+                .then(r => r.json())
+                .then(d => {
+                    if(d) {
+                        document.getElementById('prefecture').value = d.prefecture || '';
+                        document.getElementById('city').value = d.city || '';
+                        document.getElementById('address1').value = d.address1 || '';
+                    } else { 
+                        alert('住所が見つかりませんでした。'); 
+                    }
+                })
+                .catch(e => {
+                    alert('住所検索に失敗しました。');
+                    console.error(e);
+                });
+        });
+
+        // 現在のリスト数からインデックスを開始
+        let contactIndex = /*[[${customer.contacts != null ? customer.contacts.size() : 0}]]*/ 0;
+        
+        // ユーザーリストを取得
+        const userList = /*[[${users}]]*/ [];
+
+        // もし初期表示が0件なら、1件目の枠を追加しておく処理（任意）
+        /*
+        if (contactIndex === 0) {
+            addContactRow();
+        }
+        */
+
+        document.getElementById('add-contact-btn').addEventListener('click', function() {
+            addContactRow();
+        });
+
+        function addContactRow() {
+            const contactArea = document.getElementById('contact-area');
+            const i = contactIndex++; // インデックスを加算
+
+            // ユーザーリストからoptionを生成
+            const userOptions = userList.map(user => 
+                `<option value="${user.userName}">${user.userName}</option>`
+            ).join('');
+
+            const html = `
+                <tr class="contact-block">
+                    <th>自社担当</th>
+                    <td>
+                        <select class="form-select form-select-xs" name="contacts[${i}].internalRep" style="width: 150px;">
+                            <option value="">選択してください</option>
+                            ${userOptions}
+                        </select>
+                    </td>
+                    <td colspan="2" class="text-end">
+                        <button type="button" class="btn btn-danger btn-xs" onclick="removeContactRow(this)">削除</button>
+                    </td>
+                </tr>
+                <tr>
+                    <th>担当者名</th>
+                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].contactName"></td>
+                    <th>部署・役職</th>
+                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].department"></td>
+                </tr>
+                <tr>
+                    <th>TEL</th>
+                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].telNo"></td>
+                    <th>Email</th>
+                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].email"></td>
+                </tr>
+                <tr class="divider-row"><td colspan="4" style="background-color: #e9ecef; height: 10px; border: none;"></td></tr>
+            `;
+            
+            contactArea.insertAdjacentHTML('beforeend', html);
+        }
+
+        function removeContactRow(btn) {
+            // ボタンがある行(tr)を取得
+            let row = btn.closest('tr');
+            // その下の3行(名前, TEL, 区切り線)も削除
+            let next1 = row.nextElementSibling;
+            let next2 = next1 ? next1.nextElementSibling : null;
+            let next3 = next2 ? next2.nextElementSibling : null;
+
+            if(row) row.remove();
+            if(next1) next1.remove();
+            if(next2) next2.remove();
+            if(next3) next3.remove();
+        }
+    </script>
+    
+    <!-- Bootstrap 5 JS (CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+</body>
+</html>
