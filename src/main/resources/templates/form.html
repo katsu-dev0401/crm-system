@@ -150,7 +150,7 @@
                     <th>郵便番号</th>
                     <td colspan="3">
                         <div class="d-flex align-items-center gap-2">
-                            <input type="text" class="form-control form-control-xs" th:field="*{postalCode}" id="zipcode" style="width: 80px;" maxlength="8" th:errorclass="is-invalid">
+                            <input type="text" class="form-control form-control-xs" th:field="*{postalCode}" id="zipcode" style="width: 80px;" maxlength="7" placeholder="1234567" th:errorclass="is-invalid">
                             <button type="button" class="btn btn-secondary btn-xs" id="btn-address-search">住所検索</button>
                         </div>
                         <div class="invalid-feedback d-block" th:if="${#fields.hasErrors('postalCode')}" th:errors="*{postalCode}"></div>
@@ -191,7 +191,7 @@
                 <tbody id="contact-area">
                     <th:block th:each="contact, stat : *{contacts}">
                         <tr class="contact-block">
-                            <th>自社担当</th>
+                            <th>自社担当 <span class="text-danger">*</span></th>
                             <td>
                                 <input type="hidden" th:field="*{contacts[__${stat.index}__].contactId}">
                                 <select class="form-select form-select-xs" 
@@ -208,7 +208,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <th>担当者名</th>
+                            <th>担当者名 <span class="text-danger">*</span></th>
                             <td>
                                 <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].contactName}" maxlength="60" th:errorclass="is-invalid">
                                 <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].contactName}"></div>
@@ -222,12 +222,12 @@
                         <tr>
                             <th>TEL</th>
                             <td>
-                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].telNo}" maxlength="30" th:errorclass="is-invalid">
+                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].telNo}" maxlength="30" placeholder="0312345678" th:errorclass="is-invalid">
                                 <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].telNo}"></div>
                             </td>
                             <th>Email</th>
                             <td>
-                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].email}" maxlength="255" th:errorclass="is-invalid">
+                                <input type="text" class="form-control form-control-xs" th:field="*{contacts[__${stat.index}__].email}" maxlength="255" placeholder="example@co.jp" th:errorclass="is-invalid">
                                 <div class="invalid-feedback" th:errors="*{contacts[__${stat.index}__].email}"></div>
                             </td>
                         </tr>
@@ -359,9 +359,9 @@
                 </tr>
                 <tr>
                     <th>TEL</th>
-                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].telNo"></td>
+                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].telNo" maxlength="30" placeholder="0312345678"></td>
                     <th>Email</th>
-                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].email"></td>
+                    <td><input type="text" class="form-control form-control-xs" name="contacts[${i}].email" maxlength="255" placeholder="example@co.jp"></td>
                 </tr>
                 <tr class="divider-row"><td colspan="4" style="background-color: #e9ecef; height: 10px; border: none;"></td></tr>
             `;
