@@ -12,7 +12,7 @@ import lombok.Data;
 @Data
 public class Customer {
     private Integer customerId;   // 顧客コード
-    @NotBlank
+    @NotBlank(message = "会社名を入力してください")
     @Size(max = 100)
     private String companyName;   // 会社名
     @Size(max = 100)
@@ -24,8 +24,9 @@ public class Customer {
     private String contactPerson;   // ご担当者
     private String telNo;   // 電話番号
     private String email;   // メールアドレス
-    @Size(max = 8)
-    @Pattern(regexp = "^[0-9-]*$")
+    // @Size(max = 8)
+    // @Pattern(regexp = "^[0-9-]*$")
+    @Pattern(regexp = "^[0-9]{7}$", message = "郵便番号はハイフンなしの7桁で入力してください")
     private String postalCode;   // 郵便番号
     @Size(max = 10)
     private String prefecture;   // 都道府県
