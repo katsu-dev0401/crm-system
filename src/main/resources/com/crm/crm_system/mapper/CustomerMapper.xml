@@ -5,29 +5,74 @@
 
     <resultMap id="BaseResultMap" type="com.crm.crm_system.entity.Customer">
         <id property="customerId" column="customer_id" />
-        <result property="customerName" column="customer_name" />
+        <result property="companyName" column="company_name" />
+        <result property="companyNameKana" column="company_name_kana" />
+        <result property="industryCode" column="industry_code" />
+        <result property="internalRep" column="internal_rep" />
+        <result property="contactPerson" column="contact_person" />
         <result property="telNo" column="tel_no" />
-        <result property="rankCode" column="rank_code" />
+        <result property="email" column="email" />
+        <result property="postalCode" column="postal_code" />
+        <result property="prefecture" column="prefecture" />
+        <result property="city" column="city" />
+        <result property="address1" column="address1" />
+        <result property="address2" column="address2" />
+        <result property="department" column="department" />
+        <result property="positionName" column="position_name" />
+        <result property="remarks" column="remarks" />
+        <result property="isEmailAllowed" column="is_email_allowed" />
         <result property="isDeleted" column="is_deleted" />
-        <result property="version" column="version" />
         <result property="createdAt" column="created_at" />
         <result property="updatedAt" column="updated_at" />
+    </resultMap>
+
+    <resultMap id="CustomerWithContactsResultMap" type="com.crm.crm_system.entity.Customer">
+        <id property="customerId" column="customer_id" />
+        <result property="companyName" column="company_name" />
+        <result property="companyNameKana" column="company_name_kana" />
+        <result property="industryCode" column="industry_code" />
+        <result property="internalRep" column="internal_rep" />
+        <result property="contactPerson" column="contact_person" />
+        <result property="telNo" column="tel_no" />
+        <result property="email" column="email" />
+        <result property="postalCode" column="postal_code" />
+        <result property="prefecture" column="prefecture" />
+        <result property="city" column="city" />
+        <result property="address1" column="address1" />
+        <result property="address2" column="address2" />
+        <result property="department" column="department" />
+        <result property="positionName" column="position_name" />
+        <result property="remarks" column="remarks" />
+        <result property="isEmailAllowed" column="is_email_allowed" />
+        <result property="isDeleted" column="is_deleted" />
+        <result property="createdAt" column="created_at" />
+        <result property="updatedAt" column="updated_at" />
+        <collection property="contacts" ofType="com.crm.crm_system.entity.Contact">
+            <id property="contactId" column="contact_id" />
+            <result property="customerId" column="contact_customer_id" />
+            <result property="internalRep" column="contact_internal_rep" />
+            <result property="contactName" column="contact_name" />
+            <result property="department" column="contact_department" />
+            <result property="telNo" column="contact_tel_no" />
+            <result property="email" column="contact_email" />
+        </collection>
     </resultMap>
 
     <select id="selectAll" resultMap="BaseResultMap">
         SELECT
             customer_id,
-            customer_name,
+            company_name,
+            company_name_kana,
+            industry_code,
+            contact_person,
             tel_no,
-            rank_code,
+            is_email_allowed,
             is_deleted,
-            version,
-            created_at,
-            updated_at
+            created_at
         FROM
             m_customer
         WHERE
-            is_deleted = 0
+            is_deleted = false
         ORDER BY
             customer_id ASC
     </select>
@@ -35,26 +80,143 @@
     <select id="search" resultMap="BaseResultMap">
         SELECT
             customer_id,
-            customer_name,
+            company_name,
+            company_name_kana,
+            industry_code,
+            contact_person,
             tel_no,
-            rank_code,
+            is_email_allowed,
             is_deleted,
-            version,
-            created_at,
-            updated_at
+            created_at
         FROM
             m_customer
         <where>
-            is_deleted = 0
-            <if test="name != null and name != ''">
-                AND customer_name LIKE CONCAT('%', #{name}, '%')
+            is_deleted = false
+            <if test="companyName != null and companyName != ''">
+                AND company_name LIKE CONCAT('%', #{companyName}, '%')
             </if>
-            <if test="rank != null and rank != ''">
-                AND rank_code = #{rank}
+            <if test="companyNameKana != null and companyNameKana != ''">
+                AND company_name_kana LIKE CONCAT('%', #{companyNameKana}, '%')
+            </if>
+            <if test="industryCode != null and industryCode != ''">
+                AND industry_code = #{industryCode}
+            </if>
+            <if test="dateFrom != null">
+                AND created_at::date &gt;= #{dateFrom}
+            </if>
+            <if test="dateTo != null">
+                AND created_at::date &lt;= #{dateTo}
+            </if>
+            <if test="isEmailAllowed != null">
+                AND is_email_allowed = #{isEmailAllowed}
             </if>
         </where>
         ORDER BY
             customer_id ASC
     </select>
+
+    <select id="selectById" resultMap="CustomerWithContactsResultMap">
+        SELECT
+            c.customer_id,
+            c.company_name,
+            c.company_name_kana,
+            c.industry_code,
+            c.internal_rep,
+            c.contact_person,
+            c.tel_no,
+            c.email,
+            c.postal_code,
+            c.prefecture,
+            c.city,
+            c.address1,
+            c.address2,
+            c.department,
+            c.position_name,
+            c.remarks,
+            c.is_email_allowed,
+            c.is_deleted,
+            c.created_at,
+            c.updated_at,
+            ct.contact_id,
+            ct.customer_id AS contact_customer_id,
+            ct.internal_rep AS contact_internal_rep,
+            ct.contact_name,
+            ct.department AS contact_department,
+            ct.tel_no AS contact_tel_no,
+            ct.email AS contact_email
+        FROM
+            m_customer c
+        LEFT JOIN
+            m_contact ct ON c.customer_id = ct.customer_id
+        WHERE
+            c.customer_id = #{id}
+            AND c.is_deleted = false
+        ORDER BY
+            ct.contact_id ASC
+    </select>
+
+    <insert id="insert" useGeneratedKeys="true" keyProperty="customerId">
+        INSERT INTO m_customer (
+            company_name,
+            company_name_kana,
+            industry_code,
+            postal_code,
+            prefecture,
+            city,
+            address1,
+            address2,
+            position_name,
+            remarks,
+            is_email_allowed,
+            is_deleted,
+            created_at,
+            updated_at
+        ) VALUES (
+            #{companyName},
+            #{companyNameKana},
+            #{industryCode},
+            #{postalCode},
+            #{prefecture},
+            #{city},
+            #{address1},
+            #{address2},
+            #{positionName},
+            #{remarks},
+            #{isEmailAllowed},
+            false,
+            CURRENT_TIMESTAMP,
+            CURRENT_TIMESTAMP
+        )
+    </insert>
+
+    <update id="update">
+        UPDATE m_customer
+        SET
+            company_name = #{companyName},
+            company_name_kana = #{companyNameKana},
+            industry_code = #{industryCode},
+            postal_code = #{postalCode},
+            prefecture = #{prefecture},
+            city = #{city},
+            address1 = #{address1},
+            address2 = #{address2},
+            position_name = #{positionName},
+            remarks = #{remarks},
+            is_email_allowed = #{isEmailAllowed},
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
+            customer_id = #{customerId}
+            AND is_deleted = false
+    </update>
+
+    <update id="logicalDelete">
+        UPDATE m_customer
+        SET
+            is_deleted = true,
+            updated_at = CURRENT_TIMESTAMP
+        WHERE
+            customer_id = #{customerId}
+            AND is_deleted = false
+    </update>
 
 </mapper>
